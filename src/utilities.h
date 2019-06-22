@@ -13,19 +13,18 @@
 #include <fstream>
 
 // save 3d points to file
-void save_points(std::string filename, std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > points);
+void save_points(std::string filename, std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> points);
 
 // save 3d points and it's obs in image
 void save_features(std::string filename,
-                   std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > points,
-                   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d> > features);
+                   std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> points,
+                   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> features);
 
 // save line obs
 void save_lines(std::string filename,
-                std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > features);
+                std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> features);
 
-
-void LoadPose(std::string filename, std::vector<MotionData>& pose);
+void LoadPose(std::string filename, std::vector<MotionData> &pose);
 
 // save imu body data
 void save_Pose(std::string filename, std::vector<MotionData> pose);
@@ -34,5 +33,3 @@ void save_Pose(std::string filename, std::vector<MotionData> pose);
 void save_Pose_asTUM(std::string filename, std::vector<MotionData> pose);
 
 #endif //IMUSIMWITHPOINTLINE_UTILITIES_H
-
-

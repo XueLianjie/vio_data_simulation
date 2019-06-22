@@ -28,13 +28,12 @@ struct MotionData
 };
 
 // euler2Rotation:   body frame to interitail frame
-Eigen::Matrix3d euler2Rotation( Eigen::Vector3d  eulerAngles);
+Eigen::Matrix3d euler2Rotation(Eigen::Vector3d eulerAngles);
 Eigen::Matrix3d eulerRates2bodyRates(Eigen::Vector3d eulerAngles);
-
 
 class IMU
 {
-public:
+  public:
     IMU(Param p);
     Param param_;
     Eigen::Vector3d gyro_bias_;
@@ -46,9 +45,8 @@ public:
 
     MotionData MotionModel(double t);
 
-    void addIMUnoise(MotionData& data);
-    void testImu(std::string src, std::string dist);        // imu数据进行积分，用来看imu轨迹
-
+    void addIMUnoise(MotionData &data);
+    void testImu(std::string src, std::string dist); // imu数据进行积分，用来看imu轨迹
 };
 
 #endif //IMUSIMWITHPOINTLINE_IMU_H

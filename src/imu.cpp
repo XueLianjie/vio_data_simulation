@@ -134,10 +134,12 @@ void IMU::testImu(std::string src, std::string dist)
     Eigen::Vector3d gw(0, 0, -9.81);     // ENU frame
     Eigen::Vector3d temp_a;
     Eigen::Vector3d theta;
-    for (int i = 1; i < imudata.size(); ++i)
+    for (int i = 1; i < imudata.size() - 1; ++i)
     {
 
-        MotionData imupose = imudata[i];
+        MotionData imupose = imudata[i], imupose_pre = imudata[i + 1];
+
+#ifdef EULER_INTEGRATION
 
         //delta_q = [1 , 1/2 * thetax , 1/2 * theta_y, 1/2 * theta_z]
         Eigen::Quaterniond dq;
@@ -146,14 +148,25 @@ void IMU::testImu(std::string src, std::string dist)
         dq.x() = dtheta_half.x();
         dq.y() = dtheta_half.y();
         dq.z() = dtheta_half.z();
-#ifdef EULER_INTEGRATION
         /// imu 动力学模型 欧拉积分
         Eigen::Vector3d acc_w = Qwb * (imupose.imu_acc) + gw; // aw = Rwb * ( acc_body - acc_bias ) + gw
         Qwb = Qwb * dq;
         Vw = Vw + acc_w * dt;
         Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
-#else // MID point integration \
-      /// 中值积分
+#else
+        // 中值积分
+        Eigen::Quaterniond dq;
+        Eigen::Vector3d dtheta_half = (imupose.imu_gyro + imupose_pre.imu_gyro) * dt / 4.0;
+        dq.w() = 1;
+        dq.x() = dtheta_half.x();
+        dq.y() = dtheta_half.y();
+        dq.z() = dtheta_half.z();
+
+        Eigen::Vector3d acc_w = Qwb * (imupose.imu_acc + imupose_pre.imu_acc) / 2.0 + gw;
+        Qwb = Qwb * dq;
+        Vw = Vw + acc_w * dt;
+        Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
+        //imupose_pre = imupose;
 #endif
         //　按着imu postion, imu quaternion , cam postion, cam quaternion 的格式存储，由于没有cam，所以imu存了两次
         save_points << imupose.timestamp << " "

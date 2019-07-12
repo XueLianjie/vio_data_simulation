@@ -8,8 +8,10 @@
 #include "../src/imu.h"
 #include "../src/utilities.h"
 
+// 容器中使用Eigen，后一个需要注明数据结构内存管理方法
+
 std::vector<std::pair<Eigen::Vector4d, Eigen::Vector4d>>
-CreatePointsLines(std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> &points)
+CreatePointsLines(std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> &points) 
 {
 
     std::vector<std::pair<Eigen::Vector4d, Eigen::Vector4d>> lines;
@@ -104,7 +106,7 @@ int main()
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> points;
     std::vector<std::pair<Eigen::Vector4d, Eigen::Vector4d>> lines;
     lines = CreatePointsLines(points);
-
+ 
     // IMU model
     Param params;
     IMU imuGen(params);
@@ -125,6 +127,7 @@ int main()
 
         t += 1.0 / params.imu_frequency;
     }
+    //预积分需要初始的速度和pose，即初始的p v q
     imuGen.init_velocity_ = imudata[0].imu_velocity;
     imuGen.init_twb_ = imudata.at(0).twb;
     imuGen.init_Rwb_ = imudata.at(0).Rwb;

@@ -56,7 +56,7 @@ void IMU::addIMUnoise(MotionData &data)
     std::default_random_engine generator_(rd());
     std::normal_distribution<double> noise(0.0, 1.0);
 
-    Eigen::Vector3d noise_gyro(noise(generator_), noise(generator_), noise(generator_));
+    Eigen::Vector3d noise_gyro(noise(generator_), noise(generator_), noise(generator_)); //对符合高斯分布的连续的数据进行采样，采样频率越高协方差越大
     Eigen::Matrix3d gyro_sqrt_cov = param_.gyro_noise_sigma * Eigen::Matrix3d::Identity();
     data.imu_gyro = data.imu_gyro + gyro_sqrt_cov * noise_gyro / sqrt(param_.imu_timestep) + gyro_bias_;
 
@@ -134,12 +134,10 @@ void IMU::testImu(std::string src, std::string dist)
     Eigen::Vector3d gw(0, 0, -9.81);     // ENU frame
     Eigen::Vector3d temp_a;
     Eigen::Vector3d theta;
-    for (int i = 1; i < imudata.size() - 1; ++i)
+    for (int i = 1; i < imudata.size(); ++i)
     {
 
-        MotionData imupose = imudata[i], imupose_pre = imudata[i + 1];
-
-#ifdef EULER_INTEGRATION
+        MotionData imupose = imudata[i];
 
         //delta_q = [1 , 1/2 * thetax , 1/2 * theta_y, 1/2 * theta_z]
         Eigen::Quaterniond dq;
@@ -148,26 +146,15 @@ void IMU::testImu(std::string src, std::string dist)
         dq.x() = dtheta_half.x();
         dq.y() = dtheta_half.y();
         dq.z() = dtheta_half.z();
+
         /// imu 动力学模型 欧拉积分
         Eigen::Vector3d acc_w = Qwb * (imupose.imu_acc) + gw; // aw = Rwb * ( acc_body - acc_bias ) + gw
         Qwb = Qwb * dq;
         Vw = Vw + acc_w * dt;
         Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
-#else
-        // 中值积分
-        Eigen::Quaterniond dq;
-        Eigen::Vector3d dtheta_half = (imupose.imu_gyro + imupose_pre.imu_gyro) * dt / 4.0;
-        dq.w() = 1;
-        dq.x() = dtheta_half.x();
-        dq.y() = dtheta_half.y();
-        dq.z() = dtheta_half.z();
 
-        Eigen::Vector3d acc_w = Qwb * (imupose.imu_acc + imupose_pre.imu_acc) / 2.0 + gw;
-        Qwb = Qwb * dq;
-        Vw = Vw + acc_w * dt;
-        Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
-        //imupose_pre = imupose;
-#endif
+        /// 中值积分
+
         //　按着imu postion, imu quaternion , cam postion, cam quaternion 的格式存储，由于没有cam，所以imu存了两次
         save_points << imupose.timestamp << " "
                     << Qwb.w() << " "

@@ -102,7 +102,7 @@ MotionData IMU::MotionModel(double t)
     //    Eigen::Vector3d eulerAngles(0.0,0.0, K*t );   // roll ~ 0, pitch ~ 0, yaw ~ [0,2pi]
     //    Eigen::Vector3d eulerAnglesRates(0.,0. , K);      // euler angles 的导数
 
-    Eigen::Matrix3d Rwb = euler2Rotation(eulerAngles);                               // body frame to world frame
+    Eigen::Matrix3d Rwb = euler2Rotation(eulerAngles); // body frame to world frame
     //也可以看做是关节空间到运动空间的雅各比矩阵，从速度映射到速度
     Eigen::Vector3d imu_gyro = eulerRates2bodyRates(eulerAngles) * eulerAnglesRates; //  euler rates trans to body gyro
 
@@ -137,9 +137,9 @@ void IMU::testImu(std::string src, std::string dist)
     Eigen::Vector3d theta;
     for (int i = 1; i < imudata.size(); ++i)
     {
+#if (0)
 
         MotionData imupose = imudata[i];
-
         //delta_q = [1 , 1/2 * thetax , 1/2 * theta_y, 1/2 * theta_z]
         Eigen::Quaterniond dq;
         Eigen::Vector3d dtheta_half = imupose.imu_gyro * dt / 2.0;
@@ -153,9 +153,23 @@ void IMU::testImu(std::string src, std::string dist)
         Qwb = Qwb * dq;
         Vw = Vw + acc_w * dt;
         Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
+#else
 
+        MotionData imupose = imudata[i];
+        //delta_q = [1 , 1/2 * thetax , 1/2 * theta_y, 1/2 * theta_z]
+        Eigen::Quaterniond dq;
+        Eigen::Vector3d dtheta_half = (imupose.imu_gyro + imudata[i - 1].imu_gyro) * dt / 4.0;
+        dq.w() = 1;
+        dq.x() = dtheta_half.x();
+        dq.y() = dtheta_half.y();
+        dq.z() = dtheta_half.z();
         /// 中值积分
+        Eigen::Vector3d acc_w = (Qwb * imupose.imu_acc + Qwb * dq * imudata[i - 1].imu_acc) / 2.0 + gw;
+        Qwb = Qwb * dq;
+        Vw = Vw + acc_w * dt;
+        Pwb = Pwb + Vw * dt + 0.5 * dt * dt * acc_w;
 
+#endif
         //　按着imu postion, imu quaternion , cam postion, cam quaternion 的格式存储，由于没有cam，所以imu存了两次
         save_points << imupose.timestamp << " "
                     << Qwb.w() << " "

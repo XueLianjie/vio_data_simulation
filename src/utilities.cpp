@@ -84,6 +84,8 @@ void LoadPose(std::string filename, std::vector<MotionData> &pose)
             Eigen::Vector3d t;
             Eigen::Vector3d gyro;
             Eigen::Vector3d acc;
+            Eigen::Vector3d gyro_bias;
+            Eigen::Vector3d acc_bias;
 
             ss >> time;
             ss >> q.w();
@@ -99,12 +101,19 @@ void LoadPose(std::string filename, std::vector<MotionData> &pose)
             ss >> acc(0);
             ss >> acc(1);
             ss >> acc(2);
-
+            ss >> gyro_bias(0);
+            ss >> gyro_bias(1);
+            ss >> gyro_bias(2);
+            ss >> acc_bias(0);
+            ss >> acc_bias(1);
+            ss >> acc_bias(2);
             data.timestamp = time;
             data.imu_gyro = gyro;
             data.imu_acc = acc;
             data.twb = t;
             data.Rwb = Eigen::Matrix3d(q);
+            data.imu_gyro_bias = gyro_bias;
+            data.imu_acc_bias = acc_bias;
             pose.push_back(data);
         }
     }
@@ -123,6 +132,8 @@ void save_Pose(std::string filename, std::vector<MotionData> pose)
         Eigen::Vector3d t = data.twb;
         Eigen::Vector3d gyro = data.imu_gyro;
         Eigen::Vector3d acc = data.imu_acc;
+        Eigen::Vector3d gyro_bias = data.imu_gyro_bias;
+        Eigen::Vector3d acc_bias = data.imu_acc_bias;
 
         save_points << time << " "
                     << q.w() << " "
@@ -138,6 +149,12 @@ void save_Pose(std::string filename, std::vector<MotionData> pose)
                     << acc(0) << " "
                     << acc(1) << " "
                     << acc(2) << " "
+                    << gyro_bias(0) << " "
+                    << gyro_bias(1) << " "
+                    << gyro_bias(2) << " "
+                    << acc_bias(0) << " "
+                    << acc_bias(1) << " "
+                    << acc_bias(2) << " "                    
                     << std::endl;
     }
 }

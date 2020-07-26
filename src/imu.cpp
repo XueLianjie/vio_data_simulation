@@ -180,7 +180,7 @@ void IMU::testImu(std::string src, std::string dist) {
     Eigen::Vector3d dtheta_half = (imupose.imu_gyro + imudata[i - 1].imu_gyro -
                                    imupose.imu_gyro_bias * 2) *
                                   dt / 4.0;
-    std::cout << "gyro bias " << imupose.imu_gyro_bias << std::endl;
+    //std::cout << "gyro bias " << imupose.imu_gyro_bias << std::endl;
     dq.w() = 1;
     dq.x() = dtheta_half.x();
     dq.y() = dtheta_half.y();
@@ -191,7 +191,7 @@ void IMU::testImu(std::string src, std::string dist) {
          2 * imupose.imu_acc_bias) /
             2.0 +
         gw;
-    std::cout << "acc bias " << imupose.imu_acc_bias << std::endl;
+    //std::cout << "acc bias " << imupose.imu_acc_bias << std::endl;
 
     Qwb = Qwb * dq;
     Vw = Vw + acc_w * dt;

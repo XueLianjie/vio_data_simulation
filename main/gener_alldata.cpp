@@ -153,7 +153,7 @@ int main() {
     Eigen::Matrix4d Twc = Eigen::Matrix4d::Identity();
     Twc.block(0, 0, 3, 3) = data.Rwb;
     Twc.block(0, 3, 3, 1) = data.twb;
-
+    std::cout << n << " Twc " << Twc << std::endl;
     // 遍历所有的特征点，看哪些特征点在视野里
     std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>>
         points_cam;  // ３维点在当前cam视野里
